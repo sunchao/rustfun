@@ -1,3 +1,5 @@
+mod deref;
+
 #[cfg(test)]
 mod tests {
     #[test]
