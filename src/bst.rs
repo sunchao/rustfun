@@ -2,15 +2,21 @@ use std::fmt::Debug;
 use std::cmp::Ordering;
 use std::mem;
 
-/// A BST implementation, whose instances own the nodes.
 struct Node<T> where T: Debug + Ord {
   left: Option<Box<Node<T>>>,
   right: Option<Box<Node<T>>>,
-  data: T
+  data: T,
+  size: usize
 }
 
 impl<T> Node<T> where T: Debug + Ord {
-  fn new(d: T) -> Self { Node { left: None, right: None, data: d } }
+  fn new(d: T) -> Self { Node { left: None, right: None, data: d, size: 1 } }
+  fn size(node: &Option<Box<Node<T>>>) -> usize {
+    match *node {
+      None => 0,
+      Some(box ref n) => n.size
+    }
+  }
 }
 
 struct BST<T> where T: Debug + Ord {
@@ -25,7 +31,7 @@ impl<T> BST<T> where T: Debug + Ord {
   }
 
   fn add_helper(node: Option<Box<Node<T>>>, data: T) -> Option<Box<Node<T>>> {
-    let new_node = match node {
+    let mut new_node = match node {
       None => box Node::new(data),
       Some(box mut n) => {
         match data.cmp(&n.data) {
@@ -36,6 +42,7 @@ impl<T> BST<T> where T: Debug + Ord {
         box n
       }
     };
+    new_node.size = 1 + Node::size(&new_node.left) + Node::size(&new_node.right);
     Some(new_node)
   }
 
@@ -80,6 +87,10 @@ impl<T> BST<T> where T: Debug + Ord {
       }
     }
   }
+
+  fn size(&self) -> usize {
+    Node::size(&self.root)
+  }
 }
 
 #[cfg(test)]
@@ -87,7 +98,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_bst() {
+  fn test_bst_add() {
     let mut bst : BST<u32> = BST::new();
     bst.add(3);
     bst.add(2);
@@ -96,5 +107,15 @@ mod tests {
     assert_eq!(true, bst.get(3));
     assert_eq!(true, bst.get(2));
     assert_eq!(false, bst.get(5));
+  }
+
+  #[test]
+  fn test_bst_size() {
+    let mut bst = BST::new();
+    bst.add(2);
+    bst.add(1);
+    bst.add(4);
+    bst.add(3);
+    assert_eq!(4, bst.size());
   }
 }
