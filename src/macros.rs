@@ -1,5 +1,3 @@
-use std::ascii::AsciiExt;
-
 macro_rules! foo {
   (x => $e: expr) => (format!("mode X: {}", $e));
   (y => $e: expr) => (format!("mode Y: {}", $e));
