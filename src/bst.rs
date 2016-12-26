@@ -18,39 +18,30 @@ struct BST<T> where T: Debug + Ord {
 }
 
 impl<T> BST<T> where T: Debug + Ord {
-  /// Instantiate a new empty BST
   fn new() -> Self { BST { root: None } }
 
   fn add(&mut self, data: T) {
-    let old = mem::replace(&mut self.root, None);
-    mem::replace(&mut self.root, BST::add_helper(old, data));
+    BST::swap_data(&mut self.root, data);
   }
 
   fn add_helper(node: Option<Box<Node<T>>>, data: T) -> Option<Box<Node<T>>> {
-    match node {
-      None => {
-        println!("returning #1");
-        return Some(box Node::new(data))
-      },
+    let new_node = match node {
+      None => box Node::new(data),
       Some(box mut n) => {
         match data.cmp(&n.data) {
-          Ordering::Less => {
-            let old_left = mem::replace(&mut n.left, None);
-            mem::replace(&mut n.left, BST::add_helper(old_left, data));
-            Some(box n)
-          },
-          Ordering::Equal => {
-            n.data = data;
-            Some(box n)
-          },
-          Ordering::Greater => {
-            let old_right = mem::replace(&mut n.right, None);
-            mem::replace(&mut n.right, BST::add_helper(old_right, data));
-            Some(box n)
-          }
-        }
+          Ordering::Less => BST::swap_data(&mut n.left, data),
+          Ordering::Equal => n.data = data,
+          Ordering::Greater => BST::swap_data(&mut n.right, data)
+        };
+        box n
       }
-    }
+    };
+    Some(new_node)
+  }
+
+  fn swap_data(node: &mut Option<Box<Node<T>>>, data: T) {
+    let old_node = mem::replace(node, None);
+    mem::replace(node, BST::add_helper(old_node, data));
   }
 
   fn get(&self, data: T) -> bool {
@@ -79,7 +70,7 @@ impl<T> BST<T> where T: Debug + Ord {
       None => return String::from(""),
       Some(box ref n) => {
         let mut x = String::new();
-        for i in 0..indent {
+        for _ in 0..indent {
           x += "-"
         }
         x += format!("{:?}", n.data).as_str();
@@ -100,7 +91,10 @@ mod tests {
     let mut bst : BST<u32> = BST::new();
     bst.add(3);
     bst.add(2);
-    println!("{}", bst.to_string().as_str());
+    bst.add(4);
+    assert_eq!(true, bst.get(4));
     assert_eq!(true, bst.get(3));
+    assert_eq!(true, bst.get(2));
+    assert_eq!(false, bst.get(5));
   }
 }
