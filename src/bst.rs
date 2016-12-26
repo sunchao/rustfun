@@ -68,6 +68,34 @@ impl<T> BST<T> where T: Debug + Ord {
     }
   }
 
+  fn min(&self) -> Option<&T> {
+    match self.root {
+      None => None,
+      Some(box ref n) => Some(BST::min_helper(n))
+    }
+  }
+
+  fn min_helper(node: &Node<T>) -> &T {
+    match node.left {
+      None => &node.data,
+      Some(box ref l) => BST::min_helper(l)
+    }
+  }
+
+  fn max(&self) -> Option<&T> {
+    match self.root {
+      None => None,
+      Some(box ref n) => Some(BST::max_helper(n))
+    }
+  }
+
+  fn max_helper(node: &Node<T>) -> &T {
+    match node.right {
+      None => &node.data,
+      Some(box ref l) => BST::max_helper(l)
+    }
+  }
+
   fn to_string(&self) -> String {
     BST::to_string_helper(&self.root, 0)
   }
@@ -117,5 +145,16 @@ mod tests {
     bst.add(4);
     bst.add(3);
     assert_eq!(4, bst.size());
+  }
+
+  #[test]
+  fn test_bst_min_max() {
+    let mut bst = BST::new();
+    bst.add(2);
+    bst.add(1);
+    bst.add(4);
+    bst.add(3);
+    assert_eq!(1, *bst.min().unwrap());
+    assert_eq!(4, *bst.max().unwrap());
   }
 }
