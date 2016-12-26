@@ -2,16 +2,18 @@ use std::fmt::Debug;
 use std::cmp::Ordering;
 use std::mem;
 
+type NodeType<T> = Option<Box<Node<T>>>;
+
 struct Node<T> where T: Debug + Ord {
-  left: Option<Box<Node<T>>>,
-  right: Option<Box<Node<T>>>,
+  left: NodeType<T>,
+  right: NodeType<T>,
   data: T,
   size: usize
 }
 
 impl<T> Node<T> where T: Debug + Ord {
   fn new(d: T) -> Self { Node { left: None, right: None, data: d, size: 1 } }
-  fn size(node: &Option<Box<Node<T>>>) -> usize {
+  fn size(node: &NodeType<T>) -> usize {
     match *node {
       None => 0,
       Some(box ref n) => n.size
@@ -20,7 +22,7 @@ impl<T> Node<T> where T: Debug + Ord {
 }
 
 struct BST<T> where T: Debug + Ord {
-  root: Option<Box<Node<T>>>
+  root: NodeType<T>
 }
 
 impl<T> BST<T> where T: Debug + Ord {
@@ -30,7 +32,7 @@ impl<T> BST<T> where T: Debug + Ord {
     BST::swap_data(&mut self.root, data);
   }
 
-  fn add_helper(node: Option<Box<Node<T>>>, data: T) -> Option<Box<Node<T>>> {
+  fn add_helper(node: NodeType<T>, data: T) -> NodeType<T> {
     let mut new_node = match node {
       None => box Node::new(data),
       Some(box mut n) => {
@@ -46,7 +48,7 @@ impl<T> BST<T> where T: Debug + Ord {
     Some(new_node)
   }
 
-  fn swap_data(node: &mut Option<Box<Node<T>>>, data: T) {
+  fn swap_data(node: &mut NodeType<T>, data: T) {
     let old_node = mem::replace(node, None);
     mem::replace(node, BST::add_helper(old_node, data));
   }
@@ -55,7 +57,7 @@ impl<T> BST<T> where T: Debug + Ord {
     BST::get_helper(&self.root, data)
   }
 
-  fn get_helper(node: &Option<Box<Node<T>>>, data: T) -> bool {
+  fn get_helper(node: &NodeType<T>, data: T) -> bool {
     match *node {
       None => false,
       Some(box ref n) => {
@@ -100,7 +102,7 @@ impl<T> BST<T> where T: Debug + Ord {
     BST::to_string_helper(&self.root, 0)
   }
 
-  fn to_string_helper(node: &Option<Box<Node<T>>>, indent: usize) -> String {
+  fn to_string_helper(node: &NodeType<T>, indent: usize) -> String {
     match *node {
       None => return String::from(""),
       Some(box ref n) => {
