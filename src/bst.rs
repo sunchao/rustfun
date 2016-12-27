@@ -29,7 +29,7 @@ impl<T> BST<T> where T: Debug + Ord {
   fn new() -> Self { BST { root: None } }
 
   fn add(&mut self, data: T) {
-    BST::swap_data(&mut self.root, data);
+    BST::swap_data(&mut self.root, |n| BST::add_helper(n, data));
   }
 
   fn add_helper(node: NodeType<T>, data: T) -> NodeType<T> {
@@ -37,9 +37,9 @@ impl<T> BST<T> where T: Debug + Ord {
       None => box Node::new(data),
       Some(box mut n) => {
         match data.cmp(&n.data) {
-          Ordering::Less => BST::swap_data(&mut n.left, data),
+          Ordering::Less => BST::swap_data(&mut n.left, |n| BST::add_helper(n, data)),
           Ordering::Equal => n.data = data,
-          Ordering::Greater => BST::swap_data(&mut n.right, data)
+          Ordering::Greater => BST::swap_data(&mut n.right, |n| BST::add_helper(n, data))
         };
         box n
       }
@@ -48,10 +48,12 @@ impl<T> BST<T> where T: Debug + Ord {
     Some(new_node)
   }
 
-  // First consume and then restore the unique reference `node`.
-  fn swap_data(node: &mut NodeType<T>, data: T) {
+  // Applying function `f` on `node`, and replace the value of `node` with
+  // the result of the call result from `f`.
+  fn swap_data<F>(node: &mut NodeType<T>, f: F)
+    where F: FnOnce(NodeType<T>) -> NodeType<T> {
     let old_node = mem::replace(node, None);
-    mem::replace(node, BST::add_helper(old_node, data));
+    mem::replace(node, f(old_node));
   }
 
   fn get(&self, data: T) -> bool {
@@ -101,8 +103,7 @@ impl<T> BST<T> where T: Debug + Ord {
 
   fn delete_min(&mut self) {
     if self.root.is_some() {
-      let old_root = mem::replace(&mut self.root, None);
-      mem::replace(&mut self.root, BST::delete_min_helper(old_root.unwrap()));
+      BST::swap_data(&mut self.root, |n| BST::delete_min_helper(n.unwrap()))
     }
   }
 
@@ -110,8 +111,7 @@ impl<T> BST<T> where T: Debug + Ord {
     match node.left {
       None => node.right,
       Some(_) => {
-        let old_left = mem::replace(&mut node.left, None);
-        mem::replace(&mut node.left, BST::delete_min_helper(old_left.unwrap()));
+        BST::swap_data(&mut node.left, |n| BST::delete_min_helper(n.unwrap()));
         node.size = 1 + Node::size(&node.left) + Node::size(&node.right);
         Some(node)
       }
@@ -120,8 +120,7 @@ impl<T> BST<T> where T: Debug + Ord {
 
   fn delete_max(&mut self) {
     if self.root.is_some() {
-      let old_root = mem::replace(&mut self.root, None);
-      mem::replace(&mut self.root, BST::delete_max_helper(old_root.unwrap()));
+      BST::swap_data(&mut self.root, |n| BST::delete_max_helper(n.unwrap()));
     }
   }
 
@@ -129,8 +128,7 @@ impl<T> BST<T> where T: Debug + Ord {
     match node.right {
       None => node.left,
       Some(_) => {
-        let old_right = mem::replace(&mut node.right, None);
-        mem::replace(&mut node.right, BST::delete_max_helper(old_right.unwrap()));
+        BST::swap_data(&mut node.right, |n| BST::delete_max_helper(n.unwrap()));
         node.size = 1 + Node::size(&node.left) + Node::size(&node.right);
         Some(node)
       }
