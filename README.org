@@ -1,0 +1,1 @@
+* Rust snippets for practice and fun
