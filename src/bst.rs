@@ -48,6 +48,7 @@ impl<T> BST<T> where T: Debug + Ord {
     Some(new_node)
   }
 
+  // First consume and then restore the unique reference `node`.
   fn swap_data(node: &mut NodeType<T>, data: T) {
     let old_node = mem::replace(node, None);
     mem::replace(node, BST::add_helper(old_node, data));
@@ -95,6 +96,44 @@ impl<T> BST<T> where T: Debug + Ord {
     match node.right {
       None => &node.data,
       Some(box ref l) => BST::max_helper(l)
+    }
+  }
+
+  fn delete_min(&mut self) {
+    if self.root.is_some() {
+      let old_root = mem::replace(&mut self.root, None);
+      mem::replace(&mut self.root, BST::delete_min_helper(old_root.unwrap()));
+    }
+  }
+
+  fn delete_min_helper(mut node: Box<Node<T>>) -> NodeType<T> {
+    match node.left {
+      None => node.right,
+      Some(_) => {
+        let old_left = mem::replace(&mut node.left, None);
+        mem::replace(&mut node.left, BST::delete_min_helper(old_left.unwrap()));
+        node.size = 1 + Node::size(&node.left) + Node::size(&node.right);
+        Some(node)
+      }
+    }
+  }
+
+  fn delete_max(&mut self) {
+    if self.root.is_some() {
+      let old_root = mem::replace(&mut self.root, None);
+      mem::replace(&mut self.root, BST::delete_max_helper(old_root.unwrap()));
+    }
+  }
+
+  fn delete_max_helper(mut node: Box<Node<T>>) -> NodeType<T> {
+    match node.right {
+      None => node.left,
+      Some(_) => {
+        let old_right = mem::replace(&mut node.right, None);
+        mem::replace(&mut node.right, BST::delete_max_helper(old_right.unwrap()));
+        node.size = 1 + Node::size(&node.left) + Node::size(&node.right);
+        Some(node)
+      }
     }
   }
 
@@ -158,5 +197,34 @@ mod tests {
     bst.add(3);
     assert_eq!(1, *bst.min().unwrap());
     assert_eq!(4, *bst.max().unwrap());
+  }
+
+  #[test]
+  fn test_bst_delete_min() {
+    let mut bst = BST::new();
+    bst.add(2);
+    bst.add(1);
+    bst.add(4);
+    assert_eq!(1, *bst.min().unwrap());
+    assert_eq!(3, bst.size());
+    bst.delete_min();
+    assert_eq!(false, bst.get(3));
+    assert_eq!(2, *bst.min().unwrap());
+    assert_eq!(2, bst.size());
+  }
+
+  #[test]
+  fn test_bst_delete_max() {
+    let mut bst = BST::new();
+    bst.add(2);
+    bst.add(1);
+    bst.add(4);
+    bst.add(3);
+    assert_eq!(4, *bst.max().unwrap());
+    assert_eq!(4, bst.size());
+    bst.delete_max();
+    assert_eq!(false, bst.get(4));
+    assert_eq!(3, *bst.max().unwrap());
+    assert_eq!(3, bst.size());
   }
 }
