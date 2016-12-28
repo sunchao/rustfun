@@ -12,8 +12,8 @@ struct Node<T> where T: Debug + Ord {
 }
 
 impl<T> Node<T> where T: Debug + Ord {
-  fn new(d: T) -> Self { Node { left: None, right: None, data: d, size: 1 } }
-  fn size(node: &NodeType<T>) -> usize {
+  pub fn new(d: T) -> Self { Node { left: None, right: None, data: d, size: 1 } }
+  pub fn size(node: &NodeType<T>) -> usize {
     match *node {
       None => 0,
       Some(box ref n) => n.size
@@ -26,13 +26,17 @@ struct BST<T> where T: Debug + Ord {
 }
 
 impl<T> BST<T> where T: Debug + Ord {
-  fn new() -> Self { BST { root: None } }
+  pub fn new() -> Self { BST { root: None } }
 
-  fn is_empty(&self) -> bool {
+  pub fn is_empty(&self) -> bool {
     self.root.is_none()
   }
 
-  fn add(&mut self, data: T) {
+  pub fn size(&self) -> usize {
+    Node::size(&self.root)
+  }
+
+  pub fn add(&mut self, data: T) {
     BST::swap_data(&mut self.root, |n| BST::add_helper(n, data));
   }
 
@@ -60,7 +64,7 @@ impl<T> BST<T> where T: Debug + Ord {
     mem::replace(node, f(old_node));
   }
 
-  fn get(&self, data: T) -> bool {
+  pub fn get(&self, data: T) -> bool {
     BST::get_helper(&self.root, data)
   }
 
@@ -78,7 +82,7 @@ impl<T> BST<T> where T: Debug + Ord {
   }
 
   /// Find the minimum value from the BST. Return `None` if the tree is empty.
-  fn min(&self) -> Option<&T> {
+  pub fn min(&self) -> Option<&T> {
     match self.root {
       None => None,
       Some(box ref n) => Some(BST::min_helper(n))
@@ -93,7 +97,7 @@ impl<T> BST<T> where T: Debug + Ord {
   }
 
   /// Find the maximum value from the BST. Return `None` if the tree is empty.
-  fn max(&self) -> Option<&T> {
+  pub fn max(&self) -> Option<&T> {
     match self.root {
       None => None,
       Some(box ref n) => Some(BST::max_helper(n))
@@ -109,7 +113,7 @@ impl<T> BST<T> where T: Debug + Ord {
 
   /// Delete the minimum node from the tree and return it.
   /// If the tree is empty, return `None` instead.
-  fn delete_min(&mut self) -> NodeType<T> {
+  pub fn delete_min(&mut self) -> NodeType<T> {
     match self.root {
       None => None,
       Some(_) => {
@@ -144,7 +148,7 @@ impl<T> BST<T> where T: Debug + Ord {
 
   /// Delete the maximum node from the tree and return it.
   /// If the tree is empty, return `None` instead.
-  fn delete_max(&mut self) -> NodeType<T> {
+  pub fn delete_max(&mut self) -> NodeType<T> {
     match self.root {
       None => None,
       Some(_) => {
@@ -178,7 +182,7 @@ impl<T> BST<T> where T: Debug + Ord {
   }
 
   /// Find any node in the tree containing `data`, and remove it from the BST.
-  fn delete(&mut self, data: T) {
+  pub fn delete(&mut self, data: T) {
     BST::swap_data(&mut self.root, |n| BST::delete_helper(n, data))
   }
 
@@ -217,7 +221,7 @@ impl<T> BST<T> where T: Debug + Ord {
     }
   }
 
-  fn to_string(&self) -> String {
+  pub fn to_string(&self) -> String {
     BST::to_string_helper(&self.root, 0)
   }
 
@@ -235,10 +239,6 @@ impl<T> BST<T> where T: Debug + Ord {
         return x
       }
     }
-  }
-
-  fn size(&self) -> usize {
-    Node::size(&self.root)
   }
 }
 
