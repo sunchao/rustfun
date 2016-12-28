@@ -108,25 +108,30 @@ impl<T> BST<T> where T: Debug + Ord {
       None => None,
       Some(_) => {
         let old_root = mem::replace(&mut self.root, None);
-        let (min, new_root) = BST::delete_min_helper(old_root.unwrap());
+        let (min, new_root) = BST::delete_min_helper(old_root);
         self.root = new_root;
         min
       }
     }
   }
 
-  fn delete_min_helper(mut node: Box<Node<T>>) -> (NodeType<T>, NodeType<T>) {
-    match node.left {
-      None => {
-        let right = mem::replace(&mut node.right, None);
-        (Some(node), right)
-      },
-      Some(_) => {
-        let old_left = mem::replace(&mut node.left, None);
-        let (min, new_left) = BST::delete_min_helper(old_left.unwrap());
-        node.left = new_left;
-        node.size = 1 + Node::size(&node.left) + Node::size(&node.right);
-        (min, Some(node))
+  fn delete_min_helper(node: NodeType<T>) -> (NodeType<T>, NodeType<T>) {
+    match node {
+      None => (None, None),
+      Some(mut n) => {
+        match n.left {
+          None => {
+            let right = mem::replace(&mut n.right, None);
+            (Some(n), right)
+          },
+          Some(_) => {
+            let old_left = mem::replace(&mut n.left, None);
+            let (min, new_left) = BST::delete_min_helper(old_left);
+            n.left = new_left;
+            n.size = 1 + Node::size(&n.left) + Node::size(&n.right);
+            (min, Some(n))
+          }
+        }
       }
     }
   }
@@ -138,25 +143,30 @@ impl<T> BST<T> where T: Debug + Ord {
       None => None,
       Some(_) => {
         let old_root = mem::replace(&mut self.root, None);
-        let (max, new_root) = BST::delete_max_helper(old_root.unwrap());
+        let (max, new_root) = BST::delete_max_helper(old_root);
         self.root = new_root;
         max
       }
     }
   }
 
-  fn delete_max_helper(mut node: Box<Node<T>>) -> (NodeType<T>, NodeType<T>) {
-    match node.right {
-      None => {
-        let left = mem::replace(&mut node.left, None);
-        (Some(node), left)
-      },
-      Some(_) => {
-        let old_right = mem::replace(&mut node.right, None);
-        let (max, new_right) = BST::delete_max_helper(old_right.unwrap());
-        node.right = new_right;
-        node.size = 1 + Node::size(&node.left) + Node::size(&node.right);
-        (max, Some(node))
+  fn delete_max_helper(node: NodeType<T>) -> (NodeType<T>, NodeType<T>) {
+    match node {
+      None => (None, None),
+      Some(mut n) => {
+        match n.right {
+          None => {
+            let left = mem::replace(&mut n.left, None);
+            (Some(n), left)
+          },
+          Some(_) => {
+            let old_right = mem::replace(&mut n.right, None);
+            let (max, new_right) = BST::delete_max_helper(old_right);
+            n.right = new_right;
+            n.size = 1 + Node::size(&n.left) + Node::size(&n.right);
+            (max, Some(n))
+          }
+        }
       }
     }
   }
