@@ -28,6 +28,10 @@ struct BST<T> where T: Debug + Ord {
 impl<T> BST<T> where T: Debug + Ord {
   fn new() -> Self { BST { root: None } }
 
+  fn is_empty(&self) -> bool {
+    self.root.is_none()
+  }
+
   fn add(&mut self, data: T) {
     BST::swap_data(&mut self.root, |n| BST::add_helper(n, data));
   }
@@ -73,6 +77,7 @@ impl<T> BST<T> where T: Debug + Ord {
     }
   }
 
+  /// Find the minimum value from the BST. Return `None` if the tree is empty.
   fn min(&self) -> Option<&T> {
     match self.root {
       None => None,
@@ -87,6 +92,7 @@ impl<T> BST<T> where T: Debug + Ord {
     }
   }
 
+  /// Find the maximum value from the BST. Return `None` if the tree is empty.
   fn max(&self) -> Option<&T> {
     match self.root {
       None => None,
@@ -171,6 +177,46 @@ impl<T> BST<T> where T: Debug + Ord {
     }
   }
 
+  /// Find any node in the tree containing `data`, and remove it from the BST.
+  fn delete(&mut self, data: T) {
+    BST::swap_data(&mut self.root, |n| BST::delete_helper(n, data))
+  }
+
+  fn delete_helper(node: NodeType<T>, data: T) -> NodeType<T> {
+    match node {
+      None => None,
+      Some(box mut n) => {
+        let mut x = match data.cmp(&n.data) {
+          Ordering::Less => {
+            BST::swap_data(&mut n.left, |n| BST::delete_helper(n, data));
+            n
+          },
+          Ordering::Greater => {
+            BST::swap_data(&mut n.right, |n| BST::delete_helper(n, data));
+            n
+          },
+          Ordering::Equal => {
+            if n.right.is_none() {
+              return n.left
+            } else if n.left.is_none() {
+              return n.right
+            } else {
+              // Both children are present
+              let new_left = mem::replace(&mut n.left, None);
+              let (new_node, new_right) = BST::delete_min_helper(n.right);
+              let mut m = *new_node.unwrap();
+              m.left = new_left;
+              m.right = new_right;
+              m
+            }
+          }
+        };
+        x.size = 1 + Node::size(&x.left) + Node::size(&x.right);
+        Some(box x)
+      }
+    }
+  }
+
   fn to_string(&self) -> String {
     BST::to_string_helper(&self.root, 0)
   }
@@ -244,6 +290,7 @@ mod tests {
     assert_eq!(true, bst.get(2));
     assert_eq!(1, *bst.min().unwrap());
     assert_eq!(3, bst.size());
+
     let ref min = bst.delete_min();
     assert_eq!(true, min.is_some());
     assert_eq!(1, min.as_ref().unwrap().data);
@@ -265,6 +312,7 @@ mod tests {
     assert_eq!(true, bst.get(2));
     assert_eq!(4, *bst.max().unwrap());
     assert_eq!(3, bst.size());
+
     let ref max = bst.delete_max();
     assert_eq!(true, max.is_some());
     assert_eq!(4, max.as_ref().unwrap().data);
@@ -273,5 +321,35 @@ mod tests {
     assert_eq!(true, bst.get(2));
     assert_eq!(2, *bst.max().unwrap());
     assert_eq!(2, bst.size());
+  }
+
+  #[test]
+  fn test_bst_delete() {
+    let mut bst = BST::new();
+    bst.add(4);
+    bst.add(1);
+    bst.add(2);
+    assert_eq!(true, bst.get(1));
+    assert_eq!(true, bst.get(4));
+    assert_eq!(true, bst.get(2));
+    assert_eq!(3, bst.size());
+
+    bst.delete(1);
+    assert_eq!(false, bst.get(1));
+    assert_eq!(true, bst.get(4));
+    assert_eq!(true, bst.get(2));
+    assert_eq!(2, bst.size());
+
+    bst.delete(4);
+    assert_eq!(false, bst.get(1));
+    assert_eq!(false, bst.get(4));
+    assert_eq!(true, bst.get(2));
+    assert_eq!(1, bst.size());
+
+    bst.delete(2);
+    assert_eq!(false, bst.get(1));
+    assert_eq!(false, bst.get(4));
+    assert_eq!(false, bst.get(2));
+    assert_eq!(true, bst.is_empty());
   }
 }
