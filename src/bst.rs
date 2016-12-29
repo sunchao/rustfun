@@ -82,33 +82,33 @@ impl<K, V> BST<K, V> where K: Debug + Ord, V: Debug {
     }
   }
 
-  /// Find the minimum value from the BST. Return `None` if the tree is empty.
-  pub fn min(&self) -> Option<&K> {
+  /// Find the minimum key from the BST. Return `None` if the tree is empty.
+  pub fn min_key(&self) -> Option<&K> {
     match self.root {
       None => None,
-      Some(box ref n) => Some(BST::min_helper(n))
+      Some(box ref n) => Some(BST::min_key_helper(n))
     }
   }
 
-  fn min_helper(node: &Node<K, V>) -> &K {
+  fn min_key_helper(node: &Node<K, V>) -> &K {
     match node.left {
       None => &node.key,
-      Some(box ref l) => BST::min_helper(l)
+      Some(box ref l) => BST::min_key_helper(l)
     }
   }
 
-  /// Find the maximum value from the BST. Return `None` if the tree is empty.
-  pub fn max(&self) -> Option<&K> {
+  /// Find the maximum key from the BST. Return `None` if the tree is empty.
+  pub fn max_key(&self) -> Option<&K> {
     match self.root {
       None => None,
-      Some(box ref n) => Some(BST::max_helper(n))
+      Some(box ref n) => Some(BST::max_key_helper(n))
     }
   }
 
-  fn max_helper(node: &Node<K, V>) -> &K {
+  fn max_key_helper(node: &Node<K, V>) -> &K {
     match node.right {
       None => &node.key,
-      Some(box ref l) => BST::max_helper(l)
+      Some(box ref l) => BST::max_key_helper(l)
     }
   }
 
@@ -276,8 +276,8 @@ mod tests {
     bst.put(1, "a");
     bst.put(4, "d");
     bst.put(3, "c");
-    assert_eq!(Some(&1), bst.min());
-    assert_eq!(Some(&4), bst.max());
+    assert_eq!(Some(&1), bst.min_key());
+    assert_eq!(Some(&4), bst.max_key());
   }
 
   #[test]
@@ -289,7 +289,7 @@ mod tests {
     assert_eq!(Some(&"a"), bst.get(1));
     assert_eq!(Some(&"d"), bst.get(4));
     assert_eq!(Some(&"b"), bst.get(2));
-    assert_eq!(Some(&1), bst.min());
+    assert_eq!(Some(&1), bst.min_key());
     assert_eq!(3, bst.size());
 
     let ref min = bst.delete_min();
@@ -298,7 +298,7 @@ mod tests {
     assert_eq!(None, bst.get(1));
     assert_eq!(Some(&"d"), bst.get(4));
     assert_eq!(Some(&"b"), bst.get(2));
-    assert_eq!(Some(&2), bst.min());
+    assert_eq!(Some(&2), bst.min_key());
     assert_eq!(2, bst.size());
   }
 
@@ -311,7 +311,7 @@ mod tests {
     assert_eq!(Some(&"a"), bst.get(1));
     assert_eq!(Some(&"d"), bst.get(4));
     assert_eq!(Some(&"b"), bst.get(2));
-    assert_eq!(Some(&4), bst.max());
+    assert_eq!(Some(&4), bst.max_key());
     assert_eq!(3, bst.size());
 
     let ref max = bst.delete_max();
@@ -320,7 +320,7 @@ mod tests {
     assert_eq!(Some(&"a"), bst.get(1));
     assert_eq!(None, bst.get(4));
     assert_eq!(Some(&"b"), bst.get(2));
-    assert_eq!(Some(&2), bst.max());
+    assert_eq!(Some(&2), bst.max_key());
     assert_eq!(2, bst.size());
   }
 
