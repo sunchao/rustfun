@@ -241,7 +241,55 @@ impl<K, V> BST<K, V> where K: Debug + Ord, V: Debug {
       }
     }
   }
+
+  fn iter(&mut self) -> BSTIter<K, V> {
+    BSTIter::new(&self.root)
+  }
 }
+
+struct BSTIter<'a, K: 'a, V: 'a> where K: Debug + Ord, V: Debug {
+  stack: Vec<&'a Box<Node<K, V>>>
+}
+
+impl<'a, K: 'a, V: 'a> BSTIter<'a, K, V> where K: Debug + Ord, V: Debug {
+  fn new(root: &'a NodeType<K, V>) -> Self {
+    BSTIter {
+      stack: BSTIter::init_stack(root)
+    }
+  }
+
+  fn init_stack(root: &'a NodeType<K, V>) -> Vec<&'a Box<Node<K, V>>> {
+    let mut stack = Vec::new();
+    let mut p = root;
+    while p.is_some() {
+      stack.push(p.as_ref().unwrap());
+      p = &p.as_ref().unwrap().left;
+    }
+    stack
+  }
+}
+
+impl<'a, K: 'a, V: 'a> Iterator for BSTIter<'a, K, V> where K: Debug + Ord, V: Debug {
+  type Item = (&'a K, &'a V);
+
+  fn next(&mut self) -> Option<(&'a K, &'a V)> {
+    match self.stack.pop() {
+      None => None,
+      Some(n) => {
+        let result = Some((&n.key, &n.value));
+        if n.right.is_some() {
+          let mut p = &n.right;
+          while p.is_some() {
+            self.stack.push(p.as_ref().unwrap());
+            p = &p.as_ref().unwrap().left;
+          }
+        };
+        result
+      }
+    }
+  }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -352,5 +400,20 @@ mod tests {
     assert_eq!(None, bst.get(4));
     assert_eq!(None, bst.get(2));
     assert_eq!(true, bst.is_empty());
+  }
+
+  #[test]
+  fn test_iter() {
+    let mut bst = BST::new();
+    bst.put(2, "b");
+    bst.put(1, "a");
+    bst.put(4, "d");
+    bst.put(3, "c");
+    let mut it = bst.iter();
+    assert_eq!(Some((&1, &"a")), it.next());
+    assert_eq!(Some((&2, &"b")), it.next());
+    assert_eq!(Some((&3, &"c")), it.next());
+    assert_eq!(Some((&4, &"d")), it.next());
+    assert_eq!(None, it.next());
   }
 }
