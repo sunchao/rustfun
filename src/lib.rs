@@ -3,6 +3,7 @@
 mod deref;
 mod macros;
 mod bst;
+mod dlist;
 
 #[cfg(test)]
 mod tests {
