@@ -2,11 +2,13 @@ use std::fmt::Debug;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+type Link<T> = Option<Rc<RefCell<Node<T>>>>;
+
 #[derive(Debug)]
 struct Node<T> where T: Debug {
   data: T,
-  prev: Option<Rc<RefCell<Node<T>>>>,
-  next: Option<Rc<RefCell<Node<T>>>>
+  prev: Link<T>,
+  next: Link<T>
 }
 
 impl<T> Node<T> where T: Debug {
@@ -14,8 +16,8 @@ impl<T> Node<T> where T: Debug {
 }
 
 struct List<T> where T: Debug {
-  head: Option<Rc<RefCell<Node<T>>>>,
-  tail: Option<Rc<RefCell<Node<T>>>>,
+  head: Link<T>,
+  tail: Link<T>,
   size: usize
 }
 
