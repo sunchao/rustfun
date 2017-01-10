@@ -1,4 +1,5 @@
 #![feature(box_syntax, box_patterns)]
+#![feature(rc_counts)]
 
 mod deref;
 mod macros;
