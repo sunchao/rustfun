@@ -73,7 +73,6 @@ impl<T> List<T> where T: Debug {
 mod tests {
   use super::*;
 
-  // TODO: test links
   #[test]
   fn test_add() {
     let mut list = List::new();
@@ -107,5 +106,12 @@ mod tests {
     assert_eq!(h3_uref.data, 3);
     assert!(h3_uref.prev.is_some());
     assert!(h3_uref.next.is_some());
+
+    assert!(Rc::ptr_eq(h2_uref.prev.as_ref().unwrap(), h1));
+    assert!(Rc::ptr_eq(h2_uref.next.as_ref().unwrap(), h3));
+    assert!(Rc::ptr_eq(h3_uref.prev.as_ref().unwrap(), h2));
+    assert!(Rc::ptr_eq(h3_uref.next.as_ref().unwrap(), h1));
+
+    assert!(Rc::ptr_eq(list.tail.as_ref().unwrap(), h3));
   }
 }
