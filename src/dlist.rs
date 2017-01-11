@@ -84,15 +84,15 @@ mod tests {
     assert_eq!(2, list.size());
     list.add(3);
     assert_eq!(3, list.size());
-    assert_eq!(list.is_empty(), false);
+    assert!(!list.is_empty());
 
-    assert_eq!(list.head.is_none(), false);
+    assert!(list.head.is_some());
     let h1 = list.head.as_ref().unwrap();
     let h1_uref = h1.borrow();
 
     assert_eq!(h1_uref.data, 1);
-    assert_eq!(h1_uref.prev.is_none(), false);
-    assert_eq!(h1_uref.next.is_none(), false);
+    assert!(h1_uref.prev.is_some());
+    assert!(h1_uref.next.is_some());
 
     let h2 = h1_uref.next.as_ref().unwrap();
     let h2_uref = h2.borrow();
@@ -101,11 +101,11 @@ mod tests {
     let h3_uref = h3.borrow();
 
     assert_eq!(h2_uref.data, 2);
-    assert_eq!(h2_uref.prev.is_none(), false);
-    assert_eq!(h2_uref.next.is_none(), false);
+    assert!(h2_uref.prev.is_some());
+    assert!(h2_uref.next.is_some());
 
     assert_eq!(h3_uref.data, 3);
-    assert_eq!(h3_uref.prev.is_none(), false);
-    assert_eq!(h3_uref.next.is_none(), false);
+    assert!(h3_uref.prev.is_some());
+    assert!(h3_uref.next.is_some());
   }
 }
