@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+message Input {
+  required int64 op1 = 1;
+  required int64 op2 = 2;
+  enum Op {
+    ADD = 0;
+    SUB = 1;
+    MUL = 2;
+    DIV = 3;
+  }
+  required Op op = 3 [default = ADD];
+}
+
+message Output {
+  required int64 out = 1;
+}
+
+service Calculator {
+  rpc Calculate (Input) returns (Output);
+}
